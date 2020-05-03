@@ -5,7 +5,11 @@ int main()
 	Qfloat number;
 	number.ScanQfloat();
 	number.PrintQfloat();
-	int a = 0;
-	cin >> a;
+	
+	bool*a = Qfloat::DecToBin(number);
+	Qfloat b = Qfloat::BinToDec(a);
+
+	int c = 0;
+	cin >> c;
 	return 0;
 }
