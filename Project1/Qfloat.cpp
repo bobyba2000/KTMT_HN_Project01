@@ -5,17 +5,20 @@ struct kQPhepChia {
 	int soDu = 0;
 };
 
-int getIBit(int x, int i)
+//Lay bit thu I
+int getIBit(int x, int i) 
 {
 	return (x >> (31 - i)) & 1;
 }
 
+//chuyen so x thanh day bit a
 void decToBin(int x, int *a)
 {
 	for (int i = 0; i < 32; i++)
 		a[i] = getIBit(x, i);
 }
 
+//chuyen day bit a va tra ve so
 int binToDec(int*a)
 {
 	int exp = 1;
@@ -28,6 +31,7 @@ int binToDec(int*a)
 	return kq;
 }
 
+//thuc hien phep chia so number cho 2
 kQPhepChia chia2(string number)
 {
 	kQPhepChia kq;
@@ -42,6 +46,7 @@ kQPhepChia chia2(string number)
 	return kq;
 }
 
+//thuc hien phep nhan so number cho 2
 string nhan2(string number)
 {
 	string kq = "";
@@ -57,12 +62,14 @@ string nhan2(string number)
 	return kq;
 }
 
+//khoi tao
 Qfloat::Qfloat()
 {
 	for (int i = 0; i < _size; i++)
 		_data[i] = 0;
 }
 
+//yeu cau nhap so vao
 void Qfloat::ScanQfloat()
 {
 	//Nhap so Qfloat duoi dang xau
@@ -80,11 +87,13 @@ void Qfloat::ScanQfloat()
 	chuyenVaLuu(phanNguyen, phanThapPhan, dau, soBitDoi);
 }
 
+//In so ra
 void Qfloat::PrintQfloat()
 {
 	cout << "So Qfloat: " << convertToString();
 }
 
+//Xac dinh phan nguyen, phan thap phan, dau cua so number
 void Qfloat::xacDinhPhanNguyenPhanThapPhan(string number, string & phanNguyen, string & phanThapPhan, int & dau, int & soBitDoi)
 {
 	int i = 0;
@@ -140,6 +149,7 @@ bool isAll0(string number) //Kiem tra xem day so co toan la so 0 hay khong
 	return true;
 }
 
+//Xoa het cac so 0 o truoc phan nguyen
 void chuanHoaPhanNguyen(string&phanNguyen)
 {
 	string kq = "";
@@ -157,9 +167,9 @@ void chuanHoaPhanNguyen(string&phanNguyen)
 	phanNguyen = kq;
 }
 
-void Qfloat::chuanHoaThapPhan(string&phanNguyen, string&phanThapPhan, int dau,int&soBitDoi)
+//Dua so nhap ve dang 1.f * 2^ x;
+void Qfloat::chuanHoaThapPhan(string&phanNguyen, string&phanThapPhan, int dau, int&soBitDoi)
 {
-	//Dua so nhap ve dang 1.f * 2^ x;
 	chuanHoaPhanNguyen(phanNguyen);
 	int dem = 0;
 	if (phanNguyen == "1")
@@ -207,6 +217,7 @@ void Qfloat::chuanHoaThapPhan(string&phanNguyen, string&phanThapPhan, int dau,in
 	return;
 }
 
+//Chuyen so kieu Qfloat ve day cac bit
 bool * Qfloat::DecToBin(Qfloat x)
 {
 	bool*kq = new bool[128];
@@ -217,6 +228,7 @@ bool * Qfloat::DecToBin(Qfloat x)
 	return kq;
 }
 
+//Chuyen day cac bit ve kieu Qfloat
 Qfloat Qfloat::BinToDec(bool * bit)
 {
 	int*dayBit = new int[128];
@@ -227,7 +239,7 @@ Qfloat Qfloat::BinToDec(bool * bit)
 	return kq;
 }
 
-
+//chuyen cac so sang dang bit va luu lai vo bien _data
 void Qfloat::chuyenVaLuu(string phanNguyen, string phanThapPhan, int dau, int soBitDoi)
 {
 	//Khoi tao
@@ -328,6 +340,7 @@ void Qfloat::convertToBit(int*&dayBit)
 	delete[]bit32;
 }
 
+//thuc hien phep cong
 string cong(string soA, string soB)
 {
 	int nho = 0;
@@ -343,6 +356,7 @@ string cong(string soA, string soB)
 	return kq;
 }
 
+//chuyen so Qfloat sang chuoi
 string Qfloat::convertToString()
 {
 	int*bitSo = new int[128];
