@@ -90,7 +90,7 @@ void Qfloat::ScanQfloat()
 //In so ra
 void Qfloat::PrintQfloat()
 {
-	cout << "So Qfloat: " << convertToString();
+	cout << "So Qfloat: " << convertToStringDec();
 }
 
 //Xac dinh phan nguyen, phan thap phan, dau cua so number
@@ -267,7 +267,7 @@ void Qfloat::chuyenVaLuu(string phanNguyen, string phanThapPhan, int dau, int so
 		else phanThapPhan = kqChia.thuong;
 		phanThapPhan.erase(0, 1);
 
-		for (soBitDoi = soBitDoi + 1; soBitDoi < _MINEXPTREN; soBitDoi++)
+		for (soBitDoi = soBitDoi + 1; soBitDoi <= _MINEXPTREN; soBitDoi++)
 		{
 			phanThapPhan = phanThapPhan;
 			kQPhepChia kqChia = chia2(phanThapPhan);
@@ -275,6 +275,7 @@ void Qfloat::chuyenVaLuu(string phanNguyen, string phanThapPhan, int dau, int so
 				phanThapPhan = kqChia.thuong + '5';
 			else phanThapPhan = kqChia.thuong;
 		}
+		soBitDoi = _MINEXPTREN;
 	}
 
 	//Chuyen phan thap phan sang bit
@@ -340,32 +341,40 @@ void Qfloat::convertToBit(int*&dayBit)
 	delete[]bit32;
 }
 
-//thuc hien phep cong
-string cong(string soA, string soB)
+//thuc hien phep cong trong he
+string cong(string soA, string soB, int he)
 {
 	int nho = 0;
 	string kq = "";
 	for (int i = soA.length() - 1; i >= 0; i--)
 	{
 		int x = soA[i] + soB[i] - '0' - '0' + nho;
-		nho = x / 10;
-		kq = (char)(x % 10 + '0') + kq;
+		nho = x / he;
+		kq = (char)(x % he + '0') + kq;
 	}
 	if (nho > 0)
-		kq = (char)(nho % 10 + '0') + kq;
+		kq = (char)(nho % he + '0') + kq;
 	return kq;
 }
 
-//chuyen so Qfloat sang chuoi
-string Qfloat::convertToString()
+string tru(string soA, string soB, int he)
+{
+	int nho = 0;
+	string kq = "";
+	for (int i = soA.length() - 1; i >= 0; i--)
+	{
+		int x = soA[i] - soB[i] + nho + 2;
+		nho = (x / he) - 1;
+		kq = (char)(x % he + '0') + kq;
+	}
+	return kq;
+}
+
+string Qfloat::laySoMu()
 {
 	int*bitSo = new int[128];
 	convertToBit(bitSo);
 
-	string kq = "";
-	if (bitSo[0] == 1) kq += '-';
-
-	//Xu ly so mu
 	int*bitExp = new int[32];
 	for (int i = 0; i < 32; i++)
 		bitExp[i] = 0;
@@ -392,9 +401,18 @@ string Qfloat::convertToString()
 		soMu = (char)(exp % 10 + '0') + soMu;
 		exp /= 10;
 	}
+
 	delete[]bitExp;
-	
-	//Phan Thap Phan
+	delete[]bitSo;
+	return soMu;
+}
+
+//Lay phan thap phan
+string Qfloat::layPhanThapPhan()
+{
+	int*bitSo = new int[128];
+	convertToBit(bitSo);
+
 	string phanThapPhan = "";
 	for (int i = 0; i < _bitSig; i++)
 		phanThapPhan += '0';
@@ -404,7 +422,7 @@ string Qfloat::convertToString()
 	for (int i = _bitExp + 1; i < 128; i++)
 	{
 		if (bitSo[i] == 1)
-			phanThapPhan = cong(phanThapPhan, mu2);
+			phanThapPhan = cong(phanThapPhan, mu2, 10);
 		mu2 = chia2(mu2).thuong;
 	}
 	int dem = 0;
@@ -418,6 +436,25 @@ string Qfloat::convertToString()
 	if (phanThapPhan.length() == dem)
 		phanThapPhan = "0";
 
+	delete[]bitSo;
+	return phanThapPhan;
+}
+
+//chuyen so Qfloat sang chuoi so kieu thap phan
+string Qfloat::convertToStringDec()
+{
+	int*bitSo = new int[128];
+	convertToBit(bitSo);
+
+	string kq = "";
+	if (bitSo[0] == 1) kq += '-';
+
+	//Xu ly so mu
+	string soMu = laySoMu();
+	
+	//Phan Thap Phan
+	string phanThapPhan = layPhanThapPhan();
+
 	//so 0
 	if (soMu == "-16383" && phanThapPhan == "0")
 		return "0";
@@ -426,9 +463,258 @@ string Qfloat::convertToString()
 	if (soMu != "-16383")
 		kq = kq + "1." + phanThapPhan + "*2^" + soMu;
 	else
-		kq = kq + "0." + phanThapPhan + "*2^" + soMu;
+		kq = kq + "0." + phanThapPhan + "*2^" + "-16382";
 	return kq;
 }
+
+void shiftRightString(string&a,string x)
+{
+	a.erase(a.length() - 1, 1);
+	a.insert(0, x);
+}
+
+Qfloat Qfloat::soDoi()
+{
+	int*dayBit = NULL;
+	convertToBit(dayBit);
+	bool*bitSo = new bool[128];
+	for (int i = 0; i < 128; i++)
+		bitSo[i] = dayBit[i];
+	bitSo[0] = !bitSo[0];
+	Qfloat kq = BinToDec(bitSo);
+	delete[]bitSo;
+	return kq;
+}
+
+Qfloat Qfloat::operator+(Qfloat other)
+{
+	int*dayBitThis = NULL;
+	convertToBit(dayBitThis);
+	int*dayBitOther = NULL;
+	other.convertToBit(dayBitOther);
+
+	//neu hai so khac dau thi ta lay hai so tru nhau
+	if (dayBitThis[0] != dayBitOther[0])
+	{
+		return *this - other.soDoi();
+	}
+
+	//neu 1 trong 2 so bang 0 thi tra ve so con lai
+	if (this->convertToStringDec() == "0") return other;
+	if (other.convertToStringDec() == "0") return *this;
+
+	//Xac dinh day bit cua cac so
+	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "";
+	for (int i = 0; i < _bitExp; i++)
+	{
+		dayBitExpThis += (char)(dayBitThis[i + 1] + '0');
+		dayBitExpOther += (char)(dayBitOther[i + 1] + '0');
+		dayBitExpCong += "0";
+	}
+	dayBitExpCong[_bitExp - 1] = '1';
+	string dayBitSigThis = "", dayBitSigOther = "";
+	for (int i = 0; i < _bitSig; i++)
+	{
+		dayBitSigThis += (char)(dayBitThis[i + 1 + _bitExp] + '0');
+		dayBitSigOther += (char)(dayBitOther[i + 1 + _bitExp] + '0');
+	}
+
+	//dua ve cung so mu
+	string phanNguyenThis = "1", phanNguyenOther = "1";
+	if (isAll0(dayBitExpThis))
+	{
+		phanNguyenThis = "0";
+		dayBitExpThis = cong(dayBitExpThis, dayBitExpCong, 2);
+	}
+	if (isAll0(dayBitExpOther))
+	{
+		dayBitExpOther = cong(dayBitExpCong, dayBitExpOther, 2);
+		phanNguyenOther = "0";
+	}
+
+	while (dayBitExpOther != dayBitExpThis)
+	{
+		if (dayBitExpOther < dayBitExpThis)
+		{
+			dayBitExpOther = cong(dayBitExpOther, dayBitExpCong, 2);
+			shiftRightString(dayBitSigOther, phanNguyenOther);
+			phanNguyenOther = "0";
+			continue;
+		}
+
+		if (dayBitExpOther > dayBitExpThis)
+		{
+			dayBitExpThis = cong(dayBitExpThis, dayBitExpCong, 2);
+			shiftRightString(dayBitSigThis, phanNguyenThis);
+			phanNguyenThis = "0";
+		}
+	}
+
+	//neu cach biet 2 so qua lon thi ta tra ve so lon hon
+	if (isAll0(dayBitSigOther) && phanNguyenOther == "0")
+		return *this;
+	if (isAll0(dayBitSigThis) && phanNguyenThis == "0")
+		return other;
+
+	//thuc hien phep cong
+	phanNguyenOther = "0" + phanNguyenOther;
+	phanNguyenThis = "0" + phanNguyenThis;
+	string kqSig = cong(dayBitSigThis, dayBitSigOther, 2);
+	string kqNguyen = cong(phanNguyenOther, phanNguyenThis, 2);
+	if (kqSig.length() > _bitSig)
+	{
+		kqNguyen = cong(kqNguyen, "01", 2);
+		kqSig.erase(0, 1);
+	}
+
+	while (kqNguyen > "01")
+	{
+		shiftRightString(kqSig, "" + kqNguyen[1]);
+		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
+		kqNguyen = tru(kqNguyen, "01", 2);
+	}
+	if (isAll0(dayBitExpThis) && kqNguyen == "01")
+	{
+		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
+		kqSig.erase(0, 1);
+	}
+	
+	//tra ve ket qua
+	bool*kqBit = new bool[128];
+	kqBit[0] = dayBitThis[0];
+	for (int i = 0; i < _bitExp; i++)
+		kqBit[i + 1] = (bool)(dayBitExpThis[i] - '0');
+	for (int i = 0; i < _bitSig; i++)
+		kqBit[i + 1 + _bitExp] = (bool)(kqSig[i] - '0');
+
+	delete[]dayBitThis;
+	delete[]dayBitOther;
+	return BinToDec(kqBit);
+}
+
+
+Qfloat Qfloat::operator-(Qfloat other)
+{
+	int*dayBitThis = NULL;
+	convertToBit(dayBitThis);
+	int*dayBitOther = NULL;
+	other.convertToBit(dayBitOther);
+	
+	//neu 2 so khac dau thi ta cong voi so doi
+	if (dayBitThis[0] != dayBitOther[0])
+	{
+		return *this + other.soDoi();
+	}
+
+	//neu 1 trong 2 so bang 0 thi tra ve so con lai
+	if (this->convertToStringDec() == "0") return other.soDoi();
+	if (other.convertToStringDec() == "0") return *this;
+
+	//xac dinh day cac bit cua cac so
+	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "";
+	for (int i = 0; i < _bitExp; i++)
+	{
+		dayBitExpThis += (char)(dayBitThis[i + 1] + '0');
+		dayBitExpOther += (char)(dayBitOther[i + 1] + '0');
+		dayBitExpCong += "0";
+	}
+	dayBitExpCong[_bitExp - 1] = '1';
+	string dayBitSigThis = "", dayBitSigOther = "";
+	for (int i = 0; i < _bitSig; i++)
+	{
+		dayBitSigThis += (char)(dayBitThis[i + 1 + _bitExp] + '0');
+		dayBitSigOther += (char)(dayBitOther[i + 1 + _bitExp] + '0');
+	}
+
+	//chuyen bit mu ve cung gia tri
+	string phanNguyenThis = "1", phanNguyenOther = "1";
+	if (isAll0(dayBitExpThis))
+	{
+		phanNguyenThis = "0";
+		dayBitExpThis = cong(dayBitExpThis, dayBitExpCong, 2);
+	}
+	if (isAll0(dayBitExpOther))
+	{
+		dayBitExpOther = cong(dayBitExpCong, dayBitExpOther, 2);
+		phanNguyenOther = "0";
+	}
+
+	while (dayBitExpOther != dayBitExpThis)
+	{
+		if (dayBitExpOther < dayBitExpThis)
+		{
+			dayBitExpOther = cong(dayBitExpOther, dayBitExpCong, 2);
+			shiftRightString(dayBitSigOther, phanNguyenOther);
+			phanNguyenOther = "0";
+			continue;
+		}
+
+		if (dayBitExpOther > dayBitExpThis)
+		{
+			dayBitExpThis = cong(dayBitExpThis, dayBitExpCong, 2);
+			shiftRightString(dayBitSigThis, phanNguyenThis);
+			phanNguyenThis = "0";
+		}
+	}
+
+	//neu cach biet 2 so qua lon thi ta tra ve so lon
+	if (isAll0(dayBitSigOther) && phanNguyenOther == "0")
+		return *this;
+	if (isAll0(dayBitSigThis) && phanNguyenThis=="0")
+		return other.soDoi();
+
+	//thuc hien phep tru
+	string kqNguyen = "";
+	string kqSig = "";
+	if (phanNguyenOther + dayBitSigOther < phanNguyenThis + dayBitSigThis)
+	{
+		string kqTru = tru(phanNguyenThis + dayBitSigThis, phanNguyenOther + dayBitSigOther, 2);
+		kqNguyen = kqTru[0];
+		kqSig = kqTru.erase(0, 1);
+	}
+	else if(phanNguyenOther + dayBitSigOther > phanNguyenThis + dayBitSigThis)
+	{
+		string kqTru = tru(phanNguyenOther + dayBitSigOther, phanNguyenThis + dayBitSigThis, 2);
+		kqNguyen = kqTru[0];
+		kqSig = kqTru.erase(0, 1);
+		dayBitThis[0] = !dayBitThis[0];
+	}
+	else return Qfloat();
+
+	//Dua so ve dang chuan hoac dang khong chuan
+	string kq = kqNguyen + kqSig;
+	for (int i = 0; i < kq.length(); i++)
+		if (kq[i] == '1')
+		{
+			kq.erase(0, i + 1);
+			break;
+		}
+		else
+		{
+			dayBitExpThis = tru(dayBitExpThis, dayBitExpCong, 2);
+			if (isAll0(dayBitExpThis))
+			{
+				kq.erase(0, i + 1);
+				break;
+			}
+		}
+
+	//gom lai va tra ve ket qua
+	bool*kqBit = new bool[128];
+	for (int i = 0; i < 128; i++)
+		kqBit[i] = 0;
+	kqBit[0] = dayBitThis[0];
+
+	for (int i = 0; i < _bitExp; i++)
+		kqBit[i + 1] = (bool)(dayBitExpThis[i] - '0');
+	for (int i = 0; i < kq.length(); i++)
+		kqBit[i + 1 + _bitExp] = (bool)(kq[i] - '0');
+
+	delete[]dayBitThis;
+	delete[]dayBitOther;
+	return BinToDec(kqBit);
+}
+
 
 
 Qfloat::~Qfloat()

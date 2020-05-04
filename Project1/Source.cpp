@@ -5,9 +5,15 @@ int main()
 	Qfloat number;
 	number.ScanQfloat();
 	number.PrintQfloat();
+	cout << endl;
 	
-	bool*a = Qfloat::DecToBin(number);
-	Qfloat b = Qfloat::BinToDec(a);
+	Qfloat number2;
+	number2.ScanQfloat();
+	number2.PrintQfloat();
+	cout << endl;
+
+	Qfloat a = number + number2;
+	a.PrintQfloat();
 
 	int c = 0;
 	cin >> c;

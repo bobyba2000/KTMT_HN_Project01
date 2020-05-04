@@ -20,13 +20,19 @@ public:
 	void PrintQfloat();
 
 	void xacDinhPhanNguyenPhanThapPhan(string number, string&phanNguyen, string&phanThapPhan, int&dau, int&soBitDoi);
+	string laySoMu();
+	string layPhanThapPhan();
 
 	void chuyenVaLuu(string phanNguyen, string phanThapPhan, int dau, int soBitDoi);
 	void chuanHoaThapPhan(string&phanNguyen, string&phanThapPhan, int dau, int&soBitDoi);
 
 	void convertFromBit(int*dayBit);
 	void convertToBit(int*&dayBit);
-	string convertToString();
+	string convertToStringDec();
+
+	Qfloat soDoi();
+	Qfloat operator+(Qfloat other);
+	Qfloat operator-(Qfloat other);
 
 	static bool*DecToBin(Qfloat x);
 	static Qfloat BinToDec(bool*bit);
