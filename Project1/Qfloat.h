@@ -33,6 +33,7 @@ public:
 	Qfloat soDoi();
 	Qfloat operator+(Qfloat other);
 	Qfloat operator-(Qfloat other);
+	Qfloat operator*(Qfloat other);
 
 	static bool*DecToBin(Qfloat x);
 	static Qfloat BinToDec(bool*bit);

@@ -578,6 +578,25 @@ Qfloat Qfloat::operator+(Qfloat other)
 		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
 		kqSig.erase(0, 1);
 	}
+	kqNguyen = kqNguyen.erase(0, 1);
+
+	string kq = kqNguyen + kqSig;
+	if (!isAll0(dayBitExpThis))
+	for (int i = 0; i < kq.length(); i++)
+		if (kq[i] == '1')
+		{
+			kq.erase(0, i + 1);
+			break;
+		}
+		else
+		{
+			dayBitExpThis = tru(dayBitExpThis, dayBitExpCong, 2);
+			if (isAll0(dayBitExpThis))
+			{
+				kq.erase(0, i + 1);
+				break;
+			}
+		}
 	
 	//tra ve ket qua
 	bool*kqBit = new bool[128];
@@ -591,6 +610,7 @@ Qfloat Qfloat::operator+(Qfloat other)
 	delete[]dayBitOther;
 	return BinToDec(kqBit);
 }
+
 
 
 Qfloat Qfloat::operator-(Qfloat other)
@@ -683,6 +703,7 @@ Qfloat Qfloat::operator-(Qfloat other)
 
 	//Dua so ve dang chuan hoac dang khong chuan
 	string kq = kqNguyen + kqSig;
+	if (!isAll0(dayBitExpThis))
 	for (int i = 0; i < kq.length(); i++)
 		if (kq[i] == '1')
 		{
@@ -704,6 +725,128 @@ Qfloat Qfloat::operator-(Qfloat other)
 	for (int i = 0; i < 128; i++)
 		kqBit[i] = 0;
 	kqBit[0] = dayBitThis[0];
+
+	for (int i = 0; i < _bitExp; i++)
+		kqBit[i + 1] = (bool)(dayBitExpThis[i] - '0');
+	for (int i = 0; i < kq.length(); i++)
+		kqBit[i + 1 + _bitExp] = (bool)(kq[i] - '0');
+
+	delete[]dayBitThis;
+	delete[]dayBitOther;
+	return BinToDec(kqBit);
+}
+
+string nhan(string soA, string soB, int he)
+{
+	string kq = "";
+	string kq1 = "";
+	for (int i = 0; i < soB.length() - 1; i++)
+		kq += "0";
+	for (int i = 0; i < soA.length(); i++)
+	{
+		kq += '0';
+		if (soA[i] != '0')
+			kq = cong(kq, soB, 2);
+		soB = "0" + soB;
+	}
+	return kq;
+}
+
+Qfloat Qfloat::operator*(Qfloat other)
+{
+	int*dayBitThis = NULL;
+	convertToBit(dayBitThis);
+	int*dayBitOther = NULL;
+	other.convertToBit(dayBitOther);
+
+	//neu 1 trong 2 so bang 0 thi tra ve so con lai
+	if (this->convertToStringDec() == "0") return Qfloat();
+	if (other.convertToStringDec() == "0") return Qfloat();
+
+	//xac dinh day cac bit cua cac so
+	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "", dayBitExpBias = "";
+	for (int i = 0; i < _bitExp; i++)
+	{
+		dayBitExpThis += (char)(dayBitThis[i + 1] + '0');
+		dayBitExpOther += (char)(dayBitOther[i + 1] + '0');
+		dayBitExpCong += "0";
+		dayBitExpBias += "1";
+	}
+	dayBitExpCong[_bitExp - 1] = '1';
+	dayBitExpBias[0] = '0';
+	string dayBitSigThis = "", dayBitSigOther = "";
+	for (int i = 0; i < _bitSig; i++)
+	{
+		dayBitSigThis += (char)(dayBitThis[i + 1 + _bitExp] + '0');
+		dayBitSigOther += (char)(dayBitOther[i + 1 + _bitExp] + '0');
+	}
+
+	string phanNguyenThis = "1", phanNguyenOther = "1";
+	if (isAll0(dayBitExpThis))
+		phanNguyenThis = "0";
+	if (isAll0(dayBitExpOther))
+		phanNguyenOther = "0";
+
+	string kqExp = cong(dayBitExpOther, dayBitExpThis, 2);
+	if (kqExp.length() > dayBitExpBias.length())
+		dayBitExpBias = '0' + dayBitExpBias;
+	kqExp = tru(kqExp, dayBitExpBias, 2);
+	//Tran thi tra ve
+	if (kqExp.length() > _bitExp && kqExp[0] == '1')
+		return Qfloat();
+	if (dayBitExpThis[0] == '0' && dayBitExpOther[0] == '0' && kqExp[0] != '0')
+		return Qfloat();
+	if (kqExp.length() > _bitExp)
+		kqExp = kqExp.erase(0, 1);
+	dayBitExpThis = kqExp;
+	
+	//Nhan 2 day bit sig
+	string kqNhan = nhan(phanNguyenThis + dayBitSigThis, phanNguyenOther + dayBitSigOther, 2);
+	string kqNguyen = "";
+	for (int i = 0; i < kqNhan.length() - 2 * _bitSig; i++)
+		kqNguyen += kqNhan[i];
+	string kqSig = kqNhan.erase(0, kqNguyen.length());
+	kqSig = kqSig.erase(_bitSig, kqSig.length() - _bitSig);
+
+	//dua so ve dang chuan hoac khong chuan
+	if (kqNguyen.length() == 1)
+		kqNguyen = '0' + kqNguyen;
+	while (kqNguyen > "01")
+	{
+		shiftRightString(kqSig, "" + kqNguyen[1]);
+		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
+		kqNguyen = tru(kqNguyen, "01", 2);
+	}
+	if (isAll0(dayBitExpThis) && kqNguyen == "01")
+	{
+		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
+		kqSig.erase(0, 1);
+	}
+	kqNguyen = kqNguyen.erase(0, 1);
+
+	string kq = kqNguyen + kqSig;
+	if (!isAll0(dayBitExpThis))
+		for (int i = 0; i < kq.length(); i++)
+			if (kq[i] == '1')
+			{
+				kq.erase(0, i + 1);
+				break;
+			}
+			else
+			{
+				dayBitExpThis = tru(dayBitExpThis, dayBitExpCong, 2);
+				if (isAll0(dayBitExpThis))
+				{
+					kq.erase(0, i + 1);
+					break;
+				}
+			}
+	
+	//gom lai va tra ve ket qua
+	bool*kqBit = new bool[128];
+	for (int i = 0; i < 128; i++)
+		kqBit[i] = 0;
+	kqBit[0] = (dayBitThis[0] + dayBitOther[0]) % 2;
 
 	for (int i = 0; i < _bitExp; i++)
 		kqBit[i + 1] = (bool)(dayBitExpThis[i] - '0');
