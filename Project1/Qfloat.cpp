@@ -76,15 +76,7 @@ void Qfloat::ScanQfloat()
 	printf("Nhap so kieu Qfloat: ");
 	string number = "";
 	getline(cin, number);
-
-	//Xu ly phan nhap
-	string phanNguyen = "", phanThapPhan = "";
-	int dau = 0, soBitDoi = 0;
-	xacDinhPhanNguyenPhanThapPhan(number, phanNguyen, phanThapPhan, dau, soBitDoi);
-	
-	//Chuan hoa so va luu lai
-	chuanHoaThapPhan(phanNguyen, phanThapPhan, dau, soBitDoi);
-	chuyenVaLuu(phanNguyen, phanThapPhan, dau, soBitDoi);
+	convertFromString(number);
 }
 
 //In so ra
@@ -239,6 +231,25 @@ Qfloat Qfloat::BinToDec(bool * bit)
 	return kq;
 }
 
+Qfloat Qfloat::Infinity()
+{
+	bool*bit = new bool[128];
+	for (int i = 0; i < 128; i++)
+		bit[i] = false;
+	for (int i = 0; i < _bitExp; i++)
+		bit[i + 1] = true;
+	return BinToDec(bit);
+}
+
+bool Qfloat::isInfinity(Qfloat b)
+{
+	Qfloat a = Infinity();
+	for (int i = 0; i < _size; i++)
+		if (b._data[i] != a._data[i])
+			return false;
+	return true;
+}
+
 //chuyen cac so sang dang bit va luu lai vo bien _data
 void Qfloat::chuyenVaLuu(string phanNguyen, string phanThapPhan, int dau, int soBitDoi)
 {
@@ -276,6 +287,13 @@ void Qfloat::chuyenVaLuu(string phanNguyen, string phanThapPhan, int dau, int so
 			else phanThapPhan = kqChia.thuong;
 		}
 		soBitDoi = _MINEXPTREN;
+	}
+
+	//so Infinity
+	if (soBitDoi >= -_MINEXPTREN)
+	{
+		*this = Infinity();
+		return;
 	}
 
 	//Chuyen phan thap phan sang bit
@@ -358,8 +376,7 @@ string cong(string soA, string soB, int he)
 }
 
 string tru(string soA, string soB, int he)
-{
-	int nho = 0;
+{	int nho = 0;
 	string kq = "";
 	for (int i = soA.length() - 1; i >= 0; i--)
 	{
@@ -367,6 +384,8 @@ string tru(string soA, string soB, int he)
 		nho = (x / he) - 1;
 		kq = (char)(x % he + '0') + kq;
 	}
+	if (nho != 0)
+		kq = '1' + kq;
 	return kq;
 }
 
@@ -401,7 +420,7 @@ string Qfloat::laySoMu()
 		soMu = (char)(exp % 10 + '0') + soMu;
 		exp /= 10;
 	}
-
+	if (soMu == "") soMu = "0";
 	delete[]bitExp;
 	delete[]bitSo;
 	return soMu;
@@ -445,6 +464,7 @@ string Qfloat::convertToStringDec()
 {
 	int*bitSo = new int[128];
 	convertToBit(bitSo);
+	
 
 	string kq = "";
 	if (bitSo[0] == 1) kq += '-';
@@ -459,12 +479,28 @@ string Qfloat::convertToStringDec()
 	if (soMu == "-16383" && phanThapPhan == "0")
 		return "0";
 
+	//so Infinity
+	if (isInfinity(*this))
+		return "Infinity";
+
 	//Gom lai ta thu duoc day so
 	if (soMu != "-16383")
 		kq = kq + "1." + phanThapPhan + "*2^" + soMu;
 	else
 		kq = kq + "0." + phanThapPhan + "*2^" + "-16382";
 	return kq;
+}
+
+Qfloat Qfloat::convertFromString(string number)
+{
+	string phanNguyen = "", phanThapPhan = "";
+	int dau = 0, soBitDoi = 0;
+	xacDinhPhanNguyenPhanThapPhan(number, phanNguyen, phanThapPhan, dau, soBitDoi);
+
+	//Chuan hoa so va luu lai
+	chuanHoaThapPhan(phanNguyen, phanThapPhan, dau, soBitDoi);
+	chuyenVaLuu(phanNguyen, phanThapPhan, dau, soBitDoi);
+	return*this;
 }
 
 void shiftRightString(string&a,string x)
@@ -502,6 +538,10 @@ Qfloat Qfloat::operator+(Qfloat other)
 	//neu 1 trong 2 so bang 0 thi tra ve so con lai
 	if (this->convertToStringDec() == "0") return other;
 	if (other.convertToStringDec() == "0") return *this;
+
+	//neu 1 trong 2 so la infinity thi tra ve infinity
+	if (isInfinity(*this) || isInfinity(other))
+		return Infinity();
 
 	//Xac dinh day bit cua cac so
 	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "";
@@ -597,6 +637,16 @@ Qfloat Qfloat::operator+(Qfloat other)
 				break;
 			}
 		}
+
+	bool isInf = true;
+	for (int i = 0; i < dayBitExpThis.length(); i++)
+		if (dayBitExpThis[i] == '0')
+		{
+			isInf = false;
+			break;
+		}
+	if (isInf)
+		return Infinity();
 	
 	//tra ve ket qua
 	bool*kqBit = new bool[128];
@@ -629,6 +679,10 @@ Qfloat Qfloat::operator-(Qfloat other)
 	//neu 1 trong 2 so bang 0 thi tra ve so con lai
 	if (this->convertToStringDec() == "0") return other.soDoi();
 	if (other.convertToStringDec() == "0") return *this;
+
+	//neu 1 trong 2 so la infinity thi tra ve infinity
+	if (isInfinity(*this) || isInfinity(other))
+		return Infinity();
 
 	//xac dinh day cac bit cua cac so
 	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "";
@@ -720,6 +774,15 @@ Qfloat Qfloat::operator-(Qfloat other)
 			}
 		}
 
+	bool isInf = true;
+	for(int i=0;i<dayBitExpThis.length();i++)
+		if (dayBitExpThis[i] == '0')
+		{
+			isInf = false;
+			break;
+		}
+	if (isInf)
+		return Infinity();
 	//gom lai va tra ve ket qua
 	bool*kqBit = new bool[128];
 	for (int i = 0; i < 128; i++)
@@ -763,6 +826,10 @@ Qfloat Qfloat::operator*(Qfloat other)
 	if (this->convertToStringDec() == "0") return Qfloat();
 	if (other.convertToStringDec() == "0") return Qfloat();
 
+	//neu 1 trong 2 so la infinity thi tra ve infinity
+	if (isInfinity(*this) || isInfinity(other))
+		return Infinity();
+
 	//xac dinh day cac bit cua cac so
 	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "", dayBitExpBias = "";
 	for (int i = 0; i < _bitExp; i++)
@@ -787,13 +854,14 @@ Qfloat Qfloat::operator*(Qfloat other)
 	if (isAll0(dayBitExpOther))
 		phanNguyenOther = "0";
 
+	//Cong hai day bit Exp
 	string kqExp = cong(dayBitExpOther, dayBitExpThis, 2);
 	if (kqExp.length() > dayBitExpBias.length())
 		dayBitExpBias = '0' + dayBitExpBias;
 	kqExp = tru(kqExp, dayBitExpBias, 2);
 	//Tran thi tra ve
 	if (kqExp.length() > _bitExp && kqExp[0] == '1')
-		return Qfloat();
+		return Qfloat::Infinity();
 	if (dayBitExpThis[0] == '0' && dayBitExpOther[0] == '0' && kqExp[0] != '0')
 		return Qfloat();
 	if (kqExp.length() > _bitExp)
@@ -859,6 +927,163 @@ Qfloat Qfloat::operator*(Qfloat other)
 }
 
 
+bool soSanh(string&soA, string&soB)
+{
+	int max = soA.length() > soB.length() ? soA.length() : soB.length();
+	for (int i = soA.length(); i < max; i++)
+		soA = '0' + soA;
+	for (int i = soB.length(); i < max; i++)
+		soB = '0' + soB;
+	return !(soA < soB);
+}
+
+string chiaNhiPhan(string soA, string soB)
+{
+	string kq = "";
+	int dem = 0;
+	while (kq.length() <= _bitSig)
+	{
+		chuanHoaPhanNguyen(soA);
+		chuanHoaPhanNguyen(soB);
+		if (soSanh(soA, soB))
+		{
+			kq += "1";
+			string kqTru = tru(soA, soB, 2);
+			soA = kqTru;
+			dem = 0;
+		}
+		else
+		{
+			soA += "0";
+			if(dem>0)
+				kq += "0";
+			dem++;
+		}
+	}
+	return kq;
+}
+
+Qfloat Qfloat::operator/(Qfloat other)
+{
+	int*dayBitThis = NULL;
+	convertToBit(dayBitThis);
+	int*dayBitOther = NULL;
+	other.convertToBit(dayBitOther);
+
+	//neu 1 trong 2 so bang 0
+	if (this->convertToStringDec() == "0") return Qfloat();
+	if (other.convertToStringDec() == "0") return Qfloat::Infinity();
+
+	//neu this==infinity
+	if (isInfinity(*this))
+		return Infinity();
+
+	//neu other==Infinity
+	if (isInfinity(other))
+		return Qfloat();
+
+	//xac dinh day cac bit cua cac so
+	string dayBitExpThis = "", dayBitExpOther = "", dayBitExpCong = "", dayBitExpBias = "";
+	for (int i = 0; i < _bitExp; i++)
+	{
+		dayBitExpThis += (char)(dayBitThis[i + 1] + '0');
+		dayBitExpOther += (char)(dayBitOther[i + 1] + '0');
+		dayBitExpCong += "0";
+		dayBitExpBias += "1";
+	}
+	dayBitExpCong[_bitExp - 1] = '1';
+	dayBitExpBias[0] = '0';
+	string dayBitSigThis = "", dayBitSigOther = "";
+	for (int i = 0; i < _bitSig; i++)
+	{
+		dayBitSigThis += (char)(dayBitThis[i + 1 + _bitExp] + '0');
+		dayBitSigOther += (char)(dayBitOther[i + 1 + _bitExp] + '0');
+	}
+
+	string phanNguyenThis = "1", phanNguyenOther = "1";
+	if (isAll0(dayBitExpThis))
+		phanNguyenThis = "0";
+	if (isAll0(dayBitExpOther))
+		phanNguyenOther = "0";
+
+	//Chia 2 day bit sig
+	string This = phanNguyenThis + dayBitSigThis;
+	string this1 = This;
+	string Other = phanNguyenOther + dayBitSigOther;
+	string other1 = Other;
+	int dem = 0;
+	for (int i = 0; i < This.length(); i++)
+		if (This[i] == '0')
+		{
+			this1.erase(0, 1);
+			this1 += '0';
+			dem--;
+		}
+		else
+		{
+			if (i != 0) dem++;
+			break;
+		}
+	for (int i = 0; i < Other.length(); i++)
+		if (Other[i] == '0')
+		{
+			other1.erase(0, 1);
+			other1 += '0';
+			dem++;
+		}
+		else {
+			if (i != 0) dem--;
+			break;
+		}
+	string kqChia = chiaNhiPhan(this1, other1);
+
+	//tru hai day bit exp
+	string kqExp = dayBitExpBias;
+	while (dem != 0)
+	{
+		if (dem < 0)
+		{
+			kqExp = tru(kqExp, dayBitExpCong, 2);
+			dem++;
+		}
+		if (dem > 0)
+		{
+			kqExp = cong(kqExp, dayBitExpCong, 2);
+			dem--;
+		}
+	}
+	kqExp = cong(kqExp, dayBitExpThis, 2);
+	if (soSanh(dayBitExpOther, kqExp))
+	{
+		while (soSanh(dayBitExpOther, kqExp))
+		{
+			shiftRightString(kqChia, "0");
+			dayBitExpOther = tru(dayBitExpOther, dayBitExpCong, 2);
+			if (isAll0(kqChia))
+				return Qfloat();
+		}
+		kqExp = dayBitExpCong;
+		if (kqChia[0] == '0')
+			kqExp[kqExp.length() - 1] = '0';
+	}
+	else kqExp=tru(kqExp,dayBitExpOther,2);
+	dayBitExpThis = kqExp;
+
+	//gom lai va tra ve ket qua
+	bool*kqBit = new bool[128];
+	for (int i = 0; i < 128; i++)
+		kqBit[i] = 0;
+	kqBit[0] = (dayBitThis[0] + dayBitOther[0]) % 2;
+
+	for (int i = 0; i < _bitExp; i++)
+		kqBit[i + 1] = (bool)(dayBitExpThis[i] - '0');
+	for (int i = 0; i < kqChia.length() - 1; i++)
+		kqBit[i + 1 + _bitExp] = (bool)(kqChia[i + 1] - '0');
+
+	delete[]dayBitThis;
+	delete[]dayBitOther;
+	return BinToDec(kqBit);
+}
 
 Qfloat::~Qfloat()
 {

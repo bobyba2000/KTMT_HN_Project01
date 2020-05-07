@@ -12,7 +12,7 @@ int main()
 	number2.PrintQfloat();
 	cout << endl;
 
-	Qfloat a = number * number2;
+	Qfloat a = number / number2;
 	a.PrintQfloat();
 
 	int c = 0;

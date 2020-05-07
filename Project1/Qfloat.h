@@ -29,14 +29,18 @@ public:
 	void convertFromBit(int*dayBit);
 	void convertToBit(int*&dayBit);
 	string convertToStringDec();
+	Qfloat convertFromString(string number);
 
 	Qfloat soDoi();
 	Qfloat operator+(Qfloat other);
 	Qfloat operator-(Qfloat other);
 	Qfloat operator*(Qfloat other);
+	Qfloat operator/(Qfloat other);
 
 	static bool*DecToBin(Qfloat x);
 	static Qfloat BinToDec(bool*bit);
+	static Qfloat Infinity();
+	static bool isInfinity(Qfloat b);
 
 	~Qfloat();
 };
