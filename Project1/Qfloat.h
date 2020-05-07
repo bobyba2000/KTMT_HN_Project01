@@ -15,6 +15,8 @@ private:
 
 public:
 	Qfloat();
+	Qfloat(const char*a);
+	Qfloat(string a);
 
 	void ScanQfloat();
 	void PrintQfloat();
@@ -36,6 +38,10 @@ public:
 	Qfloat operator-(Qfloat other);
 	Qfloat operator*(Qfloat other);
 	Qfloat operator/(Qfloat other);
+
+	Qfloat&operator=(const char*a);
+	Qfloat&operator=(string a);
+	Qfloat&operator=(Qfloat a);
 
 	static bool*DecToBin(Qfloat x);
 	static Qfloat BinToDec(bool*bit);

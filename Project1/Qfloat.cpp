@@ -69,6 +69,16 @@ Qfloat::Qfloat()
 		_data[i] = 0;
 }
 
+Qfloat::Qfloat(const char * a)
+{
+	*this = a;
+}
+
+Qfloat::Qfloat(string a)
+{
+	*this = a;
+}
+
 //yeu cau nhap so vao
 void Qfloat::ScanQfloat()
 {
@@ -1067,6 +1077,7 @@ Qfloat Qfloat::operator/(Qfloat other)
 			kqExp[kqExp.length() - 1] = '0';
 	}
 	else kqExp=tru(kqExp,dayBitExpOther,2);
+	if (kqExp.length() > _bitExp) kqExp = kqExp.erase(0, 1);
 	dayBitExpThis = kqExp;
 
 	//gom lai va tra ve ket qua
@@ -1083,6 +1094,25 @@ Qfloat Qfloat::operator/(Qfloat other)
 	delete[]dayBitThis;
 	delete[]dayBitOther;
 	return BinToDec(kqBit);
+}
+
+Qfloat & Qfloat::operator=(const char*a)
+{
+	convertFromString(string(a));
+	return*this;
+}
+
+Qfloat & Qfloat::operator=(string a)
+{
+	convertFromString(a);
+	return*this;
+}
+
+Qfloat & Qfloat::operator=(Qfloat a)
+{
+	for (int i = 0; i < _size; i++)
+		_data[i] = a._data[i];
+	return*this;
 }
 
 Qfloat::~Qfloat()

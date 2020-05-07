@@ -2,17 +2,16 @@
 
 int main()
 {
-	Qfloat number;
-	number.ScanQfloat();
+	Qfloat number ="2*2^3";
 	number.PrintQfloat();
 	cout << endl;
 	
-	Qfloat number2;
-	number2.ScanQfloat();
+	Qfloat number2 = "2*2^5";
 	number2.PrintQfloat();
 	cout << endl;
 
-	Qfloat a = number / number2;
+	Qfloat a; 
+	a = number / number2;
 	a.PrintQfloat();
 
 	int c = 0;
