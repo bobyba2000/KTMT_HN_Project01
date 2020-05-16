@@ -565,7 +565,9 @@ string Qfloat::convertToStringDecClear()
 			dayBitExpThis = cong(dayBitExpThis, dayBitExpCong, 2);
 		}
 	}
-	return phanNguyenThis + '.' + phanSigThis;
+	if (dayBitThis[0] == 0)
+		return phanNguyenThis + '.' + phanSigThis;
+	return "-" + phanNguyenThis + '.' + phanSigThis;
 }
 
 Qfloat Qfloat::convertFromString(string number)

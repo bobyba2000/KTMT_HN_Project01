@@ -2,12 +2,12 @@
 
 int main()
 {
-	Qfloat a = "4.2";
+	Qfloat a = "1.3125*2^-4";
 	a.PrintQfloat();
-	Qfloat b = "4.1";
+	Qfloat b = "-1.75*2^-8";
 	b.PrintQfloat();
 
-	Qfloat c = a + b;
+	Qfloat c = a / b;
 	c.PrintQfloat();
 	int n;
 	cin >> n;
