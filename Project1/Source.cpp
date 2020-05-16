@@ -2,11 +2,11 @@
 
 int main()
 {
-	Qfloat number ="2*2^3";
+	Qfloat number;
 	number.PrintQfloat();
 	cout << endl;
 	
-	Qfloat number2 = "2*2^5";
+	Qfloat number2 = "3";
 	number2.PrintQfloat();
 	cout << endl;
 

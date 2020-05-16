@@ -31,6 +31,7 @@ public:
 	void convertFromBit(int*dayBit);
 	void convertToBit(int*&dayBit);
 	string convertToStringDec();
+	string convertToStringDecClear();
 	Qfloat convertFromString(string number);
 
 	Qfloat soDoi();

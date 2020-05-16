@@ -5,6 +5,16 @@ struct kQPhepChia {
 	int soDu = 0;
 };
 
+bool soSanh(string&soA, string&soB)
+{
+	int max = soA.length() > soB.length() ? soA.length() : soB.length();
+	for (int i = soA.length(); i < max; i++)
+		soA = '0' + soA;
+	for (int i = soB.length(); i < max; i++)
+		soB = '0' + soB;
+	return !(soA < soB);
+}
+
 //Lay bit thu I
 int getIBit(int x, int i) 
 {
@@ -92,7 +102,7 @@ void Qfloat::ScanQfloat()
 //In so ra
 void Qfloat::PrintQfloat()
 {
-	cout << "So Qfloat: " << convertToStringDec();
+	cout << "So Qfloat: " << convertToStringDec() << " hoac " << convertToStringDecClear() << endl;
 }
 
 //Xac dinh phan nguyen, phan thap phan, dau cua so number
@@ -499,6 +509,63 @@ string Qfloat::convertToStringDec()
 	else
 		kq = kq + "0." + phanThapPhan + "*2^" + "-16382";
 	return kq;
+}
+
+string Qfloat::convertToStringDecClear()
+{
+	int*dayBitThis = NULL;
+	convertToBit(dayBitThis);
+
+	//xac dinh day cac bit cua cac so
+	string dayBitExpThis = "", dayBitExpCong = "", dayBitExpBias = "";
+	for (int i = 0; i < _bitExp; i++)
+	{
+		dayBitExpThis += (char)(dayBitThis[i + 1] + '0');
+		dayBitExpCong += "0";
+		dayBitExpBias += "1";
+	}
+	dayBitExpCong[_bitExp - 1] = '1';
+	dayBitExpBias[0] = '0';
+	string phanSigThis = layPhanThapPhan();
+
+	string phanNguyenThis = "1", phanNguyenOther = "1";
+	if (isAll0(dayBitExpThis))
+		phanNguyenThis = "0";
+	while (dayBitExpThis != dayBitExpBias)
+	{
+		if (dayBitExpThis > dayBitExpBias)
+		{
+			string kqNhan = nhan2(phanSigThis);
+			phanNguyenThis = nhan2(phanNguyenThis);
+			if (kqNhan.length() > phanSigThis.length())
+			{
+				string soA = "1";
+				soSanh(soA, phanNguyenThis);
+				phanNguyenThis = cong(soA, phanNguyenThis, 10);
+				phanSigThis = kqNhan.erase(0, 1);
+			}
+			else phanSigThis = kqNhan;
+			dayBitExpThis = tru(dayBitExpThis, dayBitExpCong, 2);
+		}
+		if (dayBitExpThis < dayBitExpBias)
+		{
+			bool check = false;
+			if (chia2(phanNguyenThis).soDu == 1)
+			{
+				phanSigThis = '1' + phanSigThis;
+				check = true;
+			}
+			phanNguyenThis = chia2(phanNguyenThis).thuong;
+			kQPhepChia kqChia = chia2(phanSigThis);
+			if (kqChia.soDu == 1)
+				phanSigThis = kqChia.thuong + '5';
+			else phanSigThis = kqChia.thuong;
+			if (check)
+				phanSigThis = phanSigThis.erase(0, 1);
+			dayBitExpThis = cong(dayBitExpThis, dayBitExpCong, 2);
+		}
+	}
+	return phanNguyenThis + '.' + phanSigThis;
 }
 
 Qfloat Qfloat::convertFromString(string number)
@@ -937,16 +1004,6 @@ Qfloat Qfloat::operator*(Qfloat other)
 }
 
 
-bool soSanh(string&soA, string&soB)
-{
-	int max = soA.length() > soB.length() ? soA.length() : soB.length();
-	for (int i = soA.length(); i < max; i++)
-		soA = '0' + soA;
-	for (int i = soB.length(); i < max; i++)
-		soB = '0' + soB;
-	return !(soA < soB);
-}
-
 string chiaNhiPhan(string soA, string soB)
 {
 	string kq = "";
@@ -1046,6 +1103,8 @@ Qfloat Qfloat::operator/(Qfloat other)
 			break;
 		}
 	string kqChia = chiaNhiPhan(this1, other1);
+	if (this1 < other1)
+		dem--;
 
 	//tru hai day bit exp
 	string kqExp = dayBitExpBias;
