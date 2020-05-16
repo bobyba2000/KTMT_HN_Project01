@@ -686,7 +686,9 @@ Qfloat Qfloat::operator+(Qfloat other)
 
 	while (kqNguyen > "01")
 	{
-		shiftRightString(kqSig, "" + kqNguyen[1]);
+		if(kqNguyen[1]=='0')
+			shiftRightString(kqSig, string("0"));
+		else shiftRightString(kqSig, string("1"));
 		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
 		kqNguyen = tru(kqNguyen, "01", 2);
 	}
@@ -958,7 +960,9 @@ Qfloat Qfloat::operator*(Qfloat other)
 		kqNguyen = '0' + kqNguyen;
 	while (kqNguyen > "01")
 	{
-		shiftRightString(kqSig, "" + kqNguyen[1]);
+		if (kqNguyen[0] == '1')
+			shiftRightString(kqSig, string("1"));
+		else shiftRightString(kqSig, string("0"));
 		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
 		kqNguyen = tru(kqNguyen, "01", 2);
 	}

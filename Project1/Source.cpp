@@ -2,19 +2,14 @@
 
 int main()
 {
-	Qfloat number;
-	number.PrintQfloat();
-	cout << endl;
-	
-	Qfloat number2 = "3";
-	number2.PrintQfloat();
-	cout << endl;
-
-	Qfloat a; 
-	a = number / number2;
+	Qfloat a = "4.2";
 	a.PrintQfloat();
+	Qfloat b = "4.1";
+	b.PrintQfloat();
 
-	int c = 0;
-	cin >> c;
+	Qfloat c = a + b;
+	c.PrintQfloat();
+	int n;
+	cin >> n;
 	return 0;
 }
