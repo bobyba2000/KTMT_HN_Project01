@@ -102,7 +102,10 @@ void Qfloat::ScanQfloat()
 //In so ra
 void Qfloat::PrintQfloat()
 {
-	cout << "So Qfloat: " << convertToStringDec() << " hoac " << convertToStringDecClear() << endl;
+	string a = convertToStringDecClear();
+	if(a=="")
+		cout << "So Qfloat: " << convertToStringDec() << endl;
+	else cout << "So Qfloat: " << convertToStringDecClear() << endl;
 }
 
 //Xac dinh phan nguyen, phan thap phan, dau cua so number
@@ -524,6 +527,7 @@ string Qfloat::convertToStringDecClear()
 		dayBitExpCong += "0";
 		dayBitExpBias += "1";
 	}
+	if (dayBitExpThis < "011111111110000" || dayBitExpThis>"100000000010000") return string();
 	dayBitExpCong[_bitExp - 1] = '1';
 	dayBitExpBias[0] = '0';
 	string phanSigThis = layPhanThapPhan();
@@ -686,13 +690,13 @@ Qfloat Qfloat::operator+(Qfloat other)
 		kqSig.erase(0, 1);
 	}
 
-	while (kqNguyen > "01")
+	if (kqNguyen > "01")
 	{
 		if(kqNguyen[1]=='0')
 			shiftRightString(kqSig, string("0"));
 		else shiftRightString(kqSig, string("1"));
 		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
-		kqNguyen = tru(kqNguyen, "01", 2);
+		kqNguyen = "01";
 	}
 	if (isAll0(dayBitExpThis) && kqNguyen == "01")
 	{
@@ -961,13 +965,13 @@ Qfloat Qfloat::operator*(Qfloat other)
 	//dua so ve dang chuan hoac khong chuan
 	if (kqNguyen.length() == 1)
 		kqNguyen = '0' + kqNguyen;
-	while (kqNguyen > "01")
+	if (kqNguyen > "01")
 	{
 		if (kqNguyen[1] == '1')
 			shiftRightString(kqSig, string("1"));
 		else shiftRightString(kqSig, string("0"));
 		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
-		kqNguyen = tru(kqNguyen, "01", 2);
+		kqNguyen = "01";
 	}
 	if (isAll0(dayBitExpThis) && kqNguyen == "01")
 	{
