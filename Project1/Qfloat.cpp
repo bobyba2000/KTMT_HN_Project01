@@ -891,7 +891,8 @@ string nhan(string soA, string soB, int he)
 		kq += '0';
 		if (soA[i] != '0')
 			kq = cong(kq, soB, 2);
-		soB = "0" + soB;
+		while (kq.length() >= soB.length())
+			soB = "0" + soB;
 	}
 	return kq;
 }
@@ -962,7 +963,7 @@ Qfloat Qfloat::operator*(Qfloat other)
 		kqNguyen = '0' + kqNguyen;
 	while (kqNguyen > "01")
 	{
-		if (kqNguyen[0] == '1')
+		if (kqNguyen[1] == '1')
 			shiftRightString(kqSig, string("1"));
 		else shiftRightString(kqSig, string("0"));
 		dayBitExpThis = cong(dayBitExpCong, dayBitExpThis, 2);
